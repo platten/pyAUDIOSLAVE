@@ -1,0 +1,127 @@
+  pyAUDIOSLAVE
+
+  Paul Pietkiewicz <pawel.pietkiewicz at gmail.com>
+
+  Intro:
+  ======
+
+  No, I didn't package the band in my py script. I was just fed up with
+  importing, transcoding and organizing my music collection between my mac
+  my linux server, my NAS and a USB stick (for a dumb MP3 player installed
+  in my car). I became fed up with my transcoding shell scripts, so I ended
+  up writing a class to process my m4a files while keeping the directory structure
+  and tags intact.
+  
+  Played around with celery to manage the transcode jobs, and that seems to work
+  well, but I haven't had time to make anything clean enough to post :)
+  
+  I've started playing around with echonest's echoprint music fingerprinting and
+  tagging the other day (gotta get rid of those duplicates :), so I've wrote in
+  some code to interface with echoprint-codegen and their web APIs.
+  
+  Heads up: this isn't production quality code, just something I put together
+  these past couple days to get me through my commute. Please feel free to let
+  me know if you find any bugs, have any complaints or suggestions.
+  
+  Where:
+  ======
+  Here: https://github.com/platten/pyAUDIOSLAVE
+  
+  Prereqs:
+  ========
+  Python 2.7
+  mpg123
+  flac
+  lame
+  faad
+  faac
+  MediaInfo
+  echoprint-codegen
+  pyechonest
+  python-magic
+  pymediainfo
+
+  Tested Installation on Ubuntu 11.04:
+  ====================================
+  sudo apt-get install build-essential git ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev libtag1-dev python-software-properties
+  cd ~
+  git clone http://github.com/echonest/echoprint-codegen.git
+  cd echoprint-codegen/src
+  make
+  make install
+  cd ~
+  
+  sudo add-apt-repository ppa:shiki/mediainfo; sudo apt-get update
+  sudo apt-get install python-pip python-dev lame flac faad faac mpg123 mediainfo
+  sudo pip install python-magic pymediainfo pyechonest
+
+  git clone http://github.com/platten/pyAUDIOSLAVE
+  cd pyAUDIOSLAVE
+  sudo python setup.py install
+
+
+  Example Usage:
+  ==============
+  
+  
+  # For transcode
+In [1]: from pyaudioslave import AudioSlave
+
+In [2]: afile = AudioSlave('/home/platen/08 No More Sorrow.mp3')
+
+In [3]: afile.get_type()
+Out[3]: 'mp3'
+
+In [4]: afile.get_tags()
+Out[4]: 
+{'album': u'Minutes To Midnight Digipak',
+ 'comment': u'EOS. Yeah, baby!',
+ 'genre': u'Metal',
+ 'performer': u'Linkin Park',
+ 'recorded_date': u'2007',
+ 'title': u'No More Sorrow',
+ 'track_name_position': u'8'}
+
+In [5]: afile.transcode('flac', '~/NOMORESORROW.flac')
+Out[5]: '~/NOMORESORROW.flac'
+
+In [6]: bfile = AudioSlave('~/NOMORESORROW.flac')
+
+In [7]: bfile.get_type()
+Out[7]: 'flac'
+
+In [8]: afile.get_tags()
+Out[8]: 
+{'album': u'Minutes To Midnight Digipak',
+ 'comment': u'EOS. Yeah, baby!',
+ 'genre': u'Metal',
+ 'performer': u'Linkin Park',
+ 'recorded_date': u'2007',
+ 'title': u'No More Sorrow',
+ 'track_name_position': u'8'}
+
+In [9]: bfile.get_echoprint_code()
+Out[9]: 
+[{u'code': u'eJzFnWly9bqxZafEBu1wQBCY_xBqLeiVv...
+  u'code_count': 5814,
+  u'metadata': {u'artist': '',
+                u'bitrate': 991,
+                u'codegen_time': 0.804179,
+                u'decode_time': 1.508234,
+                u'duration': 221,
+                u'filename': u'~/NOMORESORROW.flac',
+                u'genre': u'Metal',
+                u'given_duration': 30,
+                u'release': u'Minutes To Midnight Digipak',
+                u'sample_rate': 44100,
+                u'samples_decoded': 2444159,
+                u'start_offset': 0,
+                u'title': u'No More Sorrow',
+                u'version': 4.12},
+  u'tag': 0}]
+
+ of try it from shell: pyaudioslave -h
+
+  Licensing:
+  ==========
+  See LICENSE

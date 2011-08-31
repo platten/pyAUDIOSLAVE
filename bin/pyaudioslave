@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+from pyaudioslave.pyaudioslave import *
+
+if __name__ == "__main__":
+    main()
+    sys.exit(0)

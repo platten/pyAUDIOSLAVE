@@ -1,0 +1,12 @@
+TODO
+General: convert use of decoders to single decoder library, e.g. ffmpeg
+General: move to TagLib
+General: add ENMFP codegen and lookup capabilities
+General: add OGG and APE support
+General: make some proper documentation :)
+General: check permissions before file operation / IOException handling
+
+main            :   Overhaul CLI
+_getDestPath    :   Ensure file extensions are consistant with filetype, or at least generate warning
+_alreadyExists  :   Make lists of transcoded files instead of a single reference to a file in self.transcodedFiles
+decode          :   tempfile locking
