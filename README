@@ -35,25 +35,29 @@
   lame
   faad
   faac
-  MediaInfo
+  TagLib
   echoprint-codegen
   pyechonest
   python-magic
-  pymediainfo
+  python-taglib
 
   Tested Installation on Ubuntu 11.04:
   ====================================
-  sudo apt-get install build-essential git ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev libtag1-dev python-software-properties
+  sudo apt-get install build-essential git ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev python-software-properties
   cd ~
   git clone http://github.com/echonest/echoprint-codegen.git
   cd echoprint-codegen/src
   make
   make install
   cd ~
-  
-  sudo add-apt-repository ppa:shiki/mediainfo; sudo apt-get update
-  sudo apt-get install python-pip python-dev lame flac faad faac mpg123 mediainfo
-  sudo pip install python-magic pymediainfo pyechonest
+
+  sudo apt-get install python-pip python-dev lame flac faad faac mpg123 python-imaging 
+  sudo pip install python-magic pyechonest
+  wget https://python-taglib.googlecode.com/files/taglib-3.1.tar.bz2
+  tar -zxvf taglib-3.1.tar.bz2
+  cd taglib-3.1
+  sudo python setup.py install
+  cd ~
 
   git clone http://github.com/platten/pyAUDIOSLAVE
   cd pyAUDIOSLAVE
@@ -120,7 +124,7 @@ Out[9]:
                 u'version': 4.12},
   u'tag': 0}]
 
- of try it from shell: pyaudioslave -h
+ of try it on the commandline: pyaudioslave -h
 
   Licensing:
   ==========

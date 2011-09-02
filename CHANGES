@@ -1,0 +1,12 @@
+CHANGES:
+
+0.890
+-------------------
+Cleaned up destructor
+Converted use of temppath to use of mkstemp, removed helper function from utils
+Made tag extraction more robust
+
+
+0.888
+-------------------
+Initial version

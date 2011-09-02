@@ -5,12 +5,12 @@
 __author__    = "Paul Pietkiewicz"
 __copyright__ = "Copyright 2011, Paul Pietkiewicz"
 __email__     = "pawel.pietkiewicz@gmail.com"
-__version__   = '0.888'
-
+__version__   = '0.890'
 
 import os
 import shlex
 import shutil
+import tempfile
 import subprocess
 import sys
 import argparse
@@ -18,10 +18,11 @@ import pyechonest.song as song
 from string import Template
 from pprint import pprint
 from magic import Magic
-from pymediainfo import MediaInfo
+from taglib import tagopen, InvalidMedia, ValidationError
 
-from utils import setup_dest_path, get_temp_path
-from config import SUPPORTED_TYPES, DECODE_TO_WAV, ENCODE_FROM_WAV, ENCODE_TAGS
+from utils import setup_dest_path
+from config import SUPPORTED_TYPES, DECODE_TO_WAV, ENCODE_FROM_WAV, \
+                   ENCODE_TAGS, TEMP_PREFIX
 
 class AudioSlaveException(Exception):
     """Generic AudioSlave Error"""
@@ -74,8 +75,11 @@ class AudioSlave:
         self.trancoded_files = {}
     
     def __del__(self):
-        if not self.should_cache_wav and self.wave_temp and self.wavefile:
-            os.unlink(self.wavefile)
+        try:
+            if not self.should_cache_wav and self.wave_temp and os.path.exists(self.wavefile):
+                os.unlink(self.wavefile)
+        except:
+            pass
     
     #
     # Internal Utility Functions
@@ -112,13 +116,18 @@ class AudioSlave:
      
     def _get_tags(self):
         """Returns the tag info of the associated source file."""
-        
-        media_info = MediaInfo.parse(self.sourcefile)
-        result_dict = {}
+
+        result_dict = {}        
+        try:
+            tags = tagopen(self.sourcefile)
+        except InvalidMedia:
+            print 'no decoder found'
+            return result_dict
+
         for entry in ENCODE_TAGS.keys():
             try:
-                value = getattr(media_info.tracks[0], entry)
-                if value != None:
+                value = getattr(tags, entry)
+                if value != None or value != '':
                     result_dict[entry] = value
             except AttributeError:
                 pass
@@ -138,8 +147,6 @@ class AudioSlave:
             if destination_path.endswith('/') or not destination_path.endswith(tuple(SUPPORTED_TYPES.keys())):
                 destination_path = "%s.%s" % (os.path.join(destination_path, os.path.splitext(os.path.split(self.sourcefile)[1])[0]), dest_format)
         return destination_path
-    
-
         
     def _get_preexisting(self, dest_format, destination_path):
         """
@@ -175,7 +182,7 @@ class AudioSlave:
                 return destination_path
         
         if not destination_path:
-            destination_path = get_temp_path()
+            destination_path= tempfile.mkstemp(dir=TEMP_PREFIX)[1]
             self.wave_temp = True
         else:
             setup_dest_path(destination_path)
