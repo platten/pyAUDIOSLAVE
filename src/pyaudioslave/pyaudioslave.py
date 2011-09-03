@@ -5,7 +5,7 @@
 __author__    = "Paul Pietkiewicz"
 __copyright__ = "Copyright 2011, Paul Pietkiewicz"
 __email__     = "pawel.pietkiewicz@gmail.com"
-__version__   = '0.890'
+__version__   = '0.892'
 
 import os
 import shlex
@@ -18,7 +18,7 @@ import pyechonest.song as song
 from string import Template
 from pprint import pprint
 from magic import Magic
-from taglib import tagopen, InvalidMedia, ValidationError
+from pymediainfo import MediaInfo
 
 from utils import setup_dest_path
 from config import SUPPORTED_TYPES, DECODE_TO_WAV, ENCODE_FROM_WAV, \
@@ -34,7 +34,7 @@ class AudioSlave:
     """Audio file class with transcoding & music fingerprinting capabilities."""
     
     def __init__(self, file_path, should_cache_wav=False, echoprint=False,
-                 echoprint_tags=False):
+                 echoprint_tags=False, echoprintQuickMode=True):
         """Create the AudioSlave class.
         
         Keyword arguments:
@@ -43,6 +43,9 @@ class AudioSlave:
         echoprint -- should the audiofile be fingerprinted during instantiation
         echoprint_tags -- should the echoprint audio tags be pulled durring
                          instantiation
+        echoprintQuickMode -- True ensures 30 second echoprint for ID, False
+                          ensures full song echoprint (NOTE: can crash for VERY
+                          long songs / DJ sets)
         
         NOTE: echoprint_tags parameter overwrites echoprint
         """
@@ -63,6 +66,8 @@ class AudioSlave:
             self.wavefile = None
             self.wave_temp = None
 
+        self.echoprintQuickMode = echoprintQuickMode
+        
         self.echoprint_code = None
         if echoprint:
             self.echoprint_codegen()
@@ -76,7 +81,8 @@ class AudioSlave:
     
     def __del__(self):
         try:
-            if not self.should_cache_wav and self.wave_temp and os.path.exists(self.wavefile):
+            if not self.should_cache_wav and self.wave_temp and \
+               os.path.exists(self.wavefile):
                 os.unlink(self.wavefile)
         except:
             pass
@@ -118,19 +124,18 @@ class AudioSlave:
         """Returns the tag info of the associated source file."""
 
         result_dict = {}        
-        try:
-            tags = tagopen(self.sourcefile)
-        except InvalidMedia:
-            print 'no decoder found'
-            return result_dict
+        media_info = MediaInfo.parse(self.sourcefile)
+        if hasattr(media_info, 'tracks') \
+            and type(media_info.tracks) == type([]) \
+            and len(media_info.tracks):
+            for entry in ENCODE_TAGS.keys():
+                try:
+                    value = getattr(media_info.tracks[0], entry)
+                    if value != None:
+                        result_dict[entry] = value
+                except AttributeError:
+                    pass
 
-        for entry in ENCODE_TAGS.keys():
-            try:
-                value = getattr(tags, entry)
-                if value != None or value != '':
-                    result_dict[entry] = value
-            except AttributeError:
-                pass
         return result_dict
     
     def _get_dest_path(self, dest_format, destination_path=None):
@@ -143,9 +148,11 @@ class AudioSlave:
             # Use sourcefile path
             destination_path = "%s.%s" % (os.path.splitext(self.sourcefile)[0], dest_format)
         else:
-            setup_dest_path(destination_path)
             if destination_path.endswith('/') or not destination_path.endswith(tuple(SUPPORTED_TYPES.keys())):
                 destination_path = "%s.%s" % (os.path.join(destination_path, os.path.splitext(os.path.split(self.sourcefile)[1])[0]), dest_format)
+                setup_dest_path(destination_path)
+            elif '/' in destination_path and destination_path.endswith(tuple(SUPPORTED_TYPES.keys())):
+                setup_dest_path(destination_path)
         return destination_path
         
     def _get_preexisting(self, dest_format, destination_path):
@@ -210,8 +217,8 @@ class AudioSlave:
 
         tags = self._get_tag_param_str(dest_format) 
         command_line = str(ENCODE_FROM_WAV[dest_format].substitute(wavefile=self.wavefile, \
-                                                                tags=tags, \
-                                                                destfile=destination_path))
+                                                    tags=tags, \
+                                                    destfile=destination_path))
         command_list = shlex.split(command_line)
         with open('/dev/null', 'w') as DEVNULL:
             returncode = subprocess.call(command_list, stdout=DEVNULL, stderr=DEVNULL)
@@ -297,8 +304,12 @@ class AudioSlave:
         """Create and store echoprint code"""
         
         # Fragments taken from echonest's echonest-codegen lookup.py script
-        # Note that song.identify reads just the first 30 seconds of the file
-        fp = song.util.codegen(self.sourcefile)
+        if self.echoprintQuickMode:
+            # echoprintQuickMode --> reads just the first 30 seconds of the file
+            fp = song.util.codegen(self.sourcefile)
+        else:
+            fp = song.util.codegen(self.sourcefile, start=-1, duration=-1)
+
         if len(fp) and "code" in fp[0]:
             self.echoprint_code = fp
         else:
@@ -306,8 +317,8 @@ class AudioSlave:
             raise AudioSlaveException(msg)
     
     def update_echonest_tags(self):
-        """Obtain echoprint tags (if exist) for sourcefile. Generate echoprint code
-           if required"""
+        """Obtain echoprint tags (if exist) for sourcefile. Generate echoprint
+           code if required"""
            
         # Fragments taken from echonest's echonest-codegen lookup.py script
         if not self.echoprint_code:

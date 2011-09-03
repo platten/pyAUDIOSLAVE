@@ -49,17 +49,11 @@ def recursiveTranscoder(rootDir, destRoot, destFormat):
         print "Encode job for '%s' added" % key
     print "done"
 
-def recursiveCodegen(rootDir):
-    fileList = walker(rootDir)
-    for key in fileList:
-        codegen.delay(key)
-        print "Codegen job for '%s' added" % key
-    print "done"
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print "./populator.py <source_root_dir> <dest_root_dir> {%s}" % ", ".join(SUPPORTED_TYPES.keys())
         sys.exit(1)
-    listConstructor (sys.argv[1], sys.argv[2], sys.argv[3])
+    recursiveTranscoder(sys.argv[1], sys.argv[2], sys.argv[3])
+    print "Jobs added."
     sys.exit(0)

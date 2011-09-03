@@ -1,11 +1,20 @@
 CHANGES:
 
+0.892
+-------------------
+Switched back to mediainfo
+Updated tagging to be more tolerant of errors
+Updated default tagging configuration to be more robust with moving over tags
+Added ability to extract echoprint both quick (30 second) and for entire length of song
+Made destination directory handling more robust
+Cleaned up utils
+
 0.890
 -------------------
 Cleaned up destructor
 Converted use of temppath to use of mkstemp, removed helper function from utils
 Made tag extraction more robust
-added some dirty celery code, will clean up & document in next release (NOTE: requires pymongo)
+Added some dirty celery code, will clean up & document in next release (NOTE: requires pymongo)
 
 
 0.888

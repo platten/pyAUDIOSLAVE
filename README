@@ -35,11 +35,11 @@
   lame
   faad
   faac
-  TagLib
-  echoprint-codegen
+  MediaInfo
+  echoprint-codegen (requires ffmpeg TagLib)
   pyechonest
   python-magic
-  python-taglib
+  pymediainfo
 
   Tested Installation on Ubuntu 11.04:
   ====================================
@@ -51,24 +51,19 @@
   make install
   cd ~
 
-  sudo apt-get install python-pip python-dev lame flac faad faac mpg123 python-imaging 
-  sudo pip install python-magic pyechonest
-  wget https://python-taglib.googlecode.com/files/taglib-3.1.tar.bz2
-  tar -zxvf taglib-3.1.tar.bz2
-  cd taglib-3.1
-  sudo python setup.py install
-  cd ~
+  sudo add-apt-repository ppa:shiki/mediainfo; sudo apt-get update
+  sudo apt-get install python-pip python-dev lame flac faad faac mpg123 mediainfo
+  sudo pip install python-magic pymediainfo pyechonest
 
   git clone http://github.com/platten/pyAUDIOSLAVE
   cd pyAUDIOSLAVE
   sudo python setup.py install
 
-
   Example Usage:
   ==============
   
   
-  # For transcode
+    # For transcode
 In [1]: from pyaudioslave import AudioSlave
 
 In [2]: afile = AudioSlave('/home/platen/08 No More Sorrow.mp3')
@@ -123,7 +118,8 @@ Out[9]:
                 u'title': u'No More Sorrow',
                 u'version': 4.12},
   u'tag': 0}]
-
+  
+  
  of try it on the commandline: pyaudioslave -h
 
   Licensing:
