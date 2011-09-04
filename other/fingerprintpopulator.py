@@ -28,7 +28,7 @@ def recursiveCodegen(rootDir):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "./fast.py <source_root_dir> " 
+        print "./fingerprintpopulator.py <source_root_dir> " 
         sys.exit(1)
     recursiveCodegen (sys.argv[1])
     print "Jobs added."

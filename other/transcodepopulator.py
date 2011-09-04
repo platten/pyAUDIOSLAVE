@@ -52,7 +52,7 @@ def recursiveTranscoder(rootDir, destRoot, destFormat):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print "./populator.py <source_root_dir> <dest_root_dir> {%s}" % ", ".join(SUPPORTED_TYPES.keys())
+        print "./transcodepopulator.py <source_root_dir> <dest_root_dir> {%s}" % ", ".join(SUPPORTED_TYPES.keys())
         sys.exit(1)
     recursiveTranscoder(sys.argv[1], sys.argv[2], sys.argv[3])
     print "Jobs added."
