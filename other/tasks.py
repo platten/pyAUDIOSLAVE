@@ -20,7 +20,7 @@ def transcode(sourcefile, destinationPath, destFormat):
 
 @task
 def codegen(sourcefile, quickMode=False):
-    logger = transcode.get_logger()
+    logger = codegen.get_logger()
     logger.info("Source path : %s" % sourcefile)
     afile = AudioSlave(sourcefile, echoprint=True, echoprintQuickMode=quickMode)
     echoprintCode = afile.get_echoprint_code()[0]
