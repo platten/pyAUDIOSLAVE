@@ -19,17 +19,3 @@ if __name__ == "__main__":
     main(fileList)
     sys.exit(0)
 
-
-
-
-    outfile = codecs.open(exportLocation, 'r', 'utf-8')
-    json.load(outfile)
-    outfile.close()
-    print "Sanity test passed"
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print "./mongoverifier.py <export file>" 
-        sys.exit(1)
-    main(sys.argv[1])
-    sys.exit(0)
