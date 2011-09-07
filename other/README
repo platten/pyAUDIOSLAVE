@@ -1,0 +1,38 @@
+"other" Directory README
+
+Ok so here is the promised README file on what this is and what you need to do to get this working. As always, please let me know if you have any comments or ideas on how to make this better.
+
+
+WHAT THIS IS:
+=============
+What I needed, was to have a quick way to transcode music for my car, it all started there. I have a lot of music, and I'm impatient, so I needed to improvise, and that's how pyAUDIOSLAVE came into existence. It was a wrapper around transcoders which kept tags in sync between the formats. Then I ran into Echonest, and had a chance to play with their echoprint-codegen, and realizing that it was cool, worked it into my transcoding wrapper.
+
+Ok so I have an app which does a single task, what do I need to do to make it do a lot of tasks, fast. Especially if I have all my media stored on a NAS, and I have 3 relatively quick computers to help out with the transcoding.
+
+The answer came to me when I remembered reading up on celery. It's a nice distributed task queue written in python, which allows the scheduling and delegation of a collection of tasks, on a group of associated systems using message queues. And did I mention, it's simple to harness that power?
+
+So knowing that celery seems like a nice tool for the task, I installed echoprint-codegen, all the media transcoding and tagging prerequisites, RabbitMQ (the message queue server), celery, and Redis. Then I wrote a task wrapper for transcoding files and fingerprinting the files. Then I wrote some populating scripts which take the files on the shared CIFS volume from my NAS and populate the queue with tasks based on those files. For transcoding I was done, for fingerprinting, I set up mongodb to store the JSON result data from the fingerprinting process, and then wrote a script to gather the JSON data and ensure that it's valid. Was this necessary? No, but it was fun :)
+
+HOW TO GET IT WORKING:
+======================
+Sooner or later I'll have a fabfile which will automate the setup and deployment of this setup across any machine you have ssh access to (and sudo admin install privileges), but for now you can use the following. I would like to note that I'm assuming that you're installing on a clean Ubuntu 11.04 64 bit machine (might work for others, just didn't have the time to it test it out).
+
+In order to install the prerequisites run the install.sh script.
+./install.sh
+
+Afterwards cd to the other director in the pyAUDIOSLAVE tree and run:
+cd ~/pyAUDIOSLAVE/other
+celeryd -l info -I tasks
+
+In order to transcode the contents of directory ~/foo into mp3 and store the resulting transcoded files in ~/bar use the following command:
+./transcodepopulator.py ~/foo/ ~/bar/ mp3
+
+If you would like to extract echoprint fingerprints & tags from a collection of music stored in directory ~/foo do the following and store the results in ~/foofingerprints.json:
+./fingerprintpopulator.py ~/foo
+./mongoexporter.py ~/foofingerprints.json
+
+Of course you can install the transcoding prerequisites, celery and pyAUDIOSLAVE, have the media to be transcoded on a network share, and have multiple celery instances on multiple machines processing the output. All that is required is to point the worker nodes to the main RabbitMQ server in the celeryconfig.py file.
+
+For fingerprinting it would be similar, except the worker nodes' tasks.py would have to be updated to point to the appropriate central MongoDB server.
+
+
