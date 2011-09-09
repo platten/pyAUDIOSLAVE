@@ -1,6 +1,6 @@
   pyAUDIOSLAVE
 
-  Paul Pietkiewicz <pawel.pietkiewicz at gmail.com>
+  Paul Pietkiewicz <paul.pietkiewicz at acm.org>
 
   Intro:
   ======
@@ -12,16 +12,19 @@
   up writing a class to process my m4a files while keeping the directory structure
   and tags intact.
   
-  Played around with celery to manage the transcode jobs, and that seems to work
-  well, but I haven't had time to make anything clean enough to post :)
-  
   I've started playing around with echonest's echoprint music fingerprinting and
   tagging the other day (gotta get rid of those duplicates :), so I've wrote in
   some code to interface with echoprint-codegen and their web APIs.
-  
-  Heads up: this isn't production quality code, just something I put together
-  these past couple days to get me through my commute. Please feel free to let
-  me know if you find any bugs, have any complaints or suggestions.
+
+  Played around with Celery to fingerprint and transcode massive amounts of media,
+  and put the code in the 'other' directory. Please take a look if interested.
+  There is a README document explaining how it works and an install.sh script
+  to get you running in a jiffy.
+
+  Heads up: this is a work in progress and NOT production quality code... just
+  something cool I put together these past couple days to get me through my 
+  commute (and play around with echoprint-codegen and celery:). Please feel
+  free to let me know if you find any bugs, have any complaints or suggestions.
   
   Where:
   ======
@@ -62,65 +65,65 @@
   Example Usage:
   ==============
   
-  
     # For transcode
-In [1]: from pyaudioslave import AudioSlave
+    In [1]: from pyaudioslave import AudioSlave
 
-In [2]: afile = AudioSlave('/home/platen/08 No More Sorrow.mp3')
+    In [2]: afile = AudioSlave('/home/platen/08 No More Sorrow.mp3')
 
-In [3]: afile.get_type()
-Out[3]: 'mp3'
+    In [3]: afile.get_type()
+    Out[3]: 'mp3'
 
-In [4]: afile.get_tags()
-Out[4]: 
-{'album': u'Minutes To Midnight Digipak',
- 'comment': u'EOS. Yeah, baby!',
- 'genre': u'Metal',
- 'performer': u'Linkin Park',
- 'recorded_date': u'2007',
- 'title': u'No More Sorrow',
- 'track_name_position': u'8'}
+    In [4]: afile.get_tags()
+    Out[4]: 
+    {'album': u'Minutes To Midnight Digipak',
+     'comment': u'EOS. Yeah, baby!',
+     'genre': u'Metal',
+     'performer': u'Linkin Park',
+     'recorded_date': u'2007',
+     'title': u'No More Sorrow',
+     'track_name_position': u'8'}
 
-In [5]: afile.transcode('flac', '~/NOMORESORROW.flac')
-Out[5]: '~/NOMORESORROW.flac'
+    In [5]: afile.transcode('flac', '~/NOMORESORROW.flac')
+    Out[5]: '~/NOMORESORROW.flac'
 
-In [6]: bfile = AudioSlave('~/NOMORESORROW.flac')
+    In [6]: bfile = AudioSlave('~/NOMORESORROW.flac')
 
-In [7]: bfile.get_type()
-Out[7]: 'flac'
+    In [7]: bfile.get_type()
+    Out[7]: 'flac'
 
-In [8]: afile.get_tags()
-Out[8]: 
-{'album': u'Minutes To Midnight Digipak',
- 'comment': u'EOS. Yeah, baby!',
- 'genre': u'Metal',
- 'performer': u'Linkin Park',
- 'recorded_date': u'2007',
- 'title': u'No More Sorrow',
- 'track_name_position': u'8'}
+    In [8]: afile.get_tags()
+    Out[8]: 
+    {'album': u'Minutes To Midnight Digipak',
+     'comment': u'EOS. Yeah, baby!',
+     'genre': u'Metal',
+     'performer': u'Linkin Park',
+     'recorded_date': u'2007',
+     'title': u'No More Sorrow',
+     'track_name_position': u'8'}
 
-In [9]: bfile.get_echoprint_code()
-Out[9]: 
-[{u'code': u'eJzFnWly9bqxZafEBu1wQBCY_xBqLeiVv...
-  u'code_count': 5814,
-  u'metadata': {u'artist': '',
-                u'bitrate': 991,
-                u'codegen_time': 0.804179,
-                u'decode_time': 1.508234,
-                u'duration': 221,
-                u'filename': u'~/NOMORESORROW.flac',
-                u'genre': u'Metal',
-                u'given_duration': 30,
-                u'release': u'Minutes To Midnight Digipak',
-                u'sample_rate': 44100,
-                u'samples_decoded': 2444159,
-                u'start_offset': 0,
-                u'title': u'No More Sorrow',
-                u'version': 4.12},
-  u'tag': 0}]
+    In [9]: bfile.get_echoprint_code()
+    Out[9]: 
+    [{u'code': u'eJzFnWly9bqxZafEBu1wQBCY_xBqLeiVv...
+      u'code_count': 5814,
+      u'metadata': {u'artist': '',
+                    u'bitrate': 991,
+                    u'codegen_time': 0.804179,
+                    u'decode_time': 1.508234,
+                    u'duration': 221,
+                    u'filename': u'~/NOMORESORROW.flac',
+                    u'genre': u'Metal',
+                    u'given_duration': 30,
+                    u'release': u'Minutes To Midnight Digipak',
+                    u'sample_rate': 44100,
+                    u'samples_decoded': 2444159,
+                    u'start_offset': 0,
+                    u'title': u'No More Sorrow',
+                    u'version': 4.12},
+      u'tag': 0}]
   
   
- of try it on the commandline: pyaudioslave -h
+    - or try it on the commandline -  
+    pyaudioslave -h
 
   Licensing:
   ==========
